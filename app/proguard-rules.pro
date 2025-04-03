@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep record classes that will be serialized/deserialized over Gson
+-keep class * extends java.lang.Record { *; }
+# Needed for desugaring with older Android API levels
+-keepattributes *Annotation*, InnerClasses, Signature, EnclosingMethod
