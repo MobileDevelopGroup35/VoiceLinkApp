@@ -1,5 +1,6 @@
 package com.l4kt.voicelink.ui
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.l4kt.voicelink.data.database.entity.Task
@@ -8,10 +9,12 @@ import com.l4kt.voicelink.util.SpeechRecognitionState
 import com.l4kt.voicelink.util.SpeechRecognizer
 import com.l4kt.voicelink.util.TaskAnalyzer
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -21,14 +24,33 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val speechRecognizer: SpeechRecognizer,
-    private val taskAnalyzer: TaskAnalyzer
+    private val taskAnalyzer: TaskAnalyzer,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     init {
+        checkForFirstRun()
         loadTasks()
+    }
+
+    private fun checkForFirstRun() {
+        val prefs = context.getSharedPreferences("voicelink_prefs", Context.MODE_PRIVATE)
+        val isFirstRun = prefs.getBoolean("is_first_launch", true)
+
+        if (isFirstRun) {
+            // Clear all tasks on first run
+            viewModelScope.launch {
+                val tasks = taskRepository.getAllTasks().first()
+                for (task in tasks) {
+                    taskRepository.deleteTask(task)
+                }
+                // Mark as no longer first run
+                prefs.edit().putBoolean("is_first_launch", false).apply()
+            }
+        }
     }
 
     private fun loadTasks() {
@@ -131,8 +153,7 @@ class MainViewModel @Inject constructor(
             taskRepository.deleteTask(task)
         }
     }
-
-    // We've removed the unused dismissTaskAddedMessage function
+    
 
     override fun onCleared() {
         super.onCleared()
