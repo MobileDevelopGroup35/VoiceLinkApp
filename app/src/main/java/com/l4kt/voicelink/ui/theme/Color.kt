@@ -59,6 +59,6 @@ val SurfaceDark = Color(0xFF1C1B1E)
 val OnSurfaceDark = Color(0xFFE6E1E6)
 
 // Priority colors
-//val LowPriority = Color(0xFF4CAF50)
-//val MediumPriority = Color(0xFFFFC107)
-//val HighPriority = Color(0xFFE53935)
+val LowPriority = Color(0xFF4CAF50)
+val MediumPriority = Color(0xFFFFC107)
+val HighPriority = Color(0xFFE53935)
