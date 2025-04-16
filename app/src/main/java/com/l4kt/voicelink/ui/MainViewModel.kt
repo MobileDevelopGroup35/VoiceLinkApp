@@ -153,7 +153,7 @@ class MainViewModel @Inject constructor(
             taskRepository.deleteTask(task)
         }
     }
-    
+
 
     override fun onCleared() {
         super.onCleared()
